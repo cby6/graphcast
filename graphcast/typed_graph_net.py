@@ -19,7 +19,7 @@ from graphcast import typed_graph
 import jax.numpy as jnp
 import jax.tree_util as tree
 import jraph
-
+import haiku as hk
 
 # All features will be an ArrayTree.
 NodeFeatures = EdgeFeatures = SenderFeatures = ReceiverFeatures = Globals = (
@@ -146,6 +146,7 @@ def _edge_update(graph, edge_fn, edge_set_key):  # pylint: disable=invalid-name
   global_features = tree.tree_map(
       lambda g: jnp.repeat(g, n_edge, axis=0, total_repeat_length=sum_n_edge),
       graph.context.features)
+  edge_fn = hk.remat(edge_fn)
   new_features = edge_fn(
       edge_set.features, sent_attributes, received_attributes,
       global_features)
